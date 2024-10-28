@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sprint 1</title>
+
+    <!-- jQuery library -->
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"
+            integrity="sha512-aUhL2xOCrpLEuGD5f6tgHbLYEXRpYZ8G5yD+WlFrXrPy2IrWBlu6bih5C9H6qGsgqnU6mgx6KtU8TreHpASprw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer">
+    </script>
+    <script src="../servidor/Otros/passport-setup.js"></script>
+    <script src="../c/modelo.js"></script>
+    <script src="Otros/ClienteRest.js"></script>
+    <script src="Otros/ControlWeb.js"></script>
+</head>
+<body>
+<script>
+    sistema = new Sistema();
+    sistema.agregarUsuario('Petru');
+    sistema.agregarUsuario('Pepe');
+    //cw = new ControlWeb();
+    //rest = new ClienteRest(cw);
+    // cw.mostrarAgregarUsuario();
+    //cw.comprobarSesion();
+</script>
+</body>
+</html>
