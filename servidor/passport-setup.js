@@ -1,7 +1,9 @@
 const passport=require("passport");
+//const {GoogleOneTapStrategy} = require("passport-google-one-tap");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+//clear
+// const { OAuth2Client } = require('google-auth-library');
 const GoogleOneTapStrategy = require("passport-google-one-tap").GoogleOneTapStrategy;
-const LocalStrategy = require('passport-local').Strategy;
 //const GoogleOneTapStrategy = require('passport-google-one-tap').Strategy;
 
 passport.serializeUser(function(user, done) {
@@ -11,20 +13,8 @@ passport.deserializeUser(function(user, done) {
     done(null, user);
 });
 
-passport.use(
-    new GoogleStrategy({
-            clientID: "593170222026-hl59nasvk5e766r4g2e8jmbmn2dtf8ah.apps.googleusercontent.com",
-            clientSecret: "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",
-            callbackURL: "http://localhost:3000/google/callback"
-        }
-        , function(accessToken, refreshToken, profile, done) {
-            return done(null, profile);
-        }
-        )
-);
 
-passport.use(
-    new GoogleOneTapStrategy(
+passport.use(new GoogleOneTapStrategy(
         {
             //client_id:"xxxxxxx.apps.googleusercontent.com", //local
             client_id:"593170222026-hl59nasvk5e766r4g2e8jmbmn2dtf8ah.apps.googleusercontent.com", //prod-oneTap
@@ -37,4 +27,13 @@ passport.use(
         }
     )
 );
+passport.use(new GoogleStrategy({
+        clientID: "593170222026-hl59nasvk5e766r4g2e8jmbmn2dtf8ah.apps.googleusercontent.com",
+        clientSecret: "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",
+        callbackURL: "http://localhost:3000/google/callback"
+    },
+    function(accessToken, refreshToken, profile, done) {
+        return done(null, profile);
+    }
+));
 

@@ -14,12 +14,12 @@ function ClienteRest(){
         $.getJSON("/agregarUsuario/"+nick,function(data){
             if (data.nick!=-1){
                 console.log("Usuario "+nick+" ha sido registrado")
-                //msg = "Bienvenido al sistema, "+nick;
-                //cw.mostrarMensaje(msg);
             }
             else{
                 console.log("El nick ya está ocupado");
             }
+            msg = "Bienvenido al sistema, "+nick;
+            //cw.mostrarMensaje(msg);
         })
     }
     this.agregarUsuario2 = function(nick) {
