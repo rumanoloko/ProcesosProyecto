@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sprint 1</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Google One Tap -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <a class="navbar-brand" href="#">Sistema</a>
+    <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="#">Link 1</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Link 2</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Link 3</a></li>
+    </ul>
+</nav>
+
+<div id="contenido" class="container-fluid">
+    <h3 id="h3">Arquitectura base</h3>
+    <div id="au"></div>
+    <div id="au2"></div>
+    <div id="au3"></div>
+    <div id="au4"></div>
+    <div id="au5"></div>
+    <div id="au6"></div>
+    <div id="au7"></div>
+    <div id="g_id_onload"
+         data-client_id="593170222026-hl59nasvk5e766r4g2e8jmbmn2dtf8ah.apps.googleusercontent.com"
+         data-login_uri="http://localhost:3000/oneTap/callback"
+         data-skip_prompt_cookie="nick">
+    </div>
+    <div id="registro"></div>
+</div>
+
+<!-- Scripts (Colocados al final para mejorar rendimiento) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./cliente/clienteRest.js"></script>
+<script src="./cliente/ControlWeb.js"></script>
+<script src="./cliente/modelo.js"></script>
+
+<script>
+    $(document).ready(function () {
+        rest = new ClienteRest();
+        cw = new ControlWeb();
+        cw.mostrarAgregarUsuario();
+    });
+</script>
+
+</body>
+</html>
+
