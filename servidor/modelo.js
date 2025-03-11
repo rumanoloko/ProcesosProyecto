@@ -6,6 +6,45 @@ function Sistema() {
     this.cad.conectar(function(db){
         console.log("Conectado a Mongo Atlas");
     });
+
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    this.agregarUsuario=function(nick){
+        let res={"nick":-1};
+        if (!this.usuarios[nick]){
+            this.usuarios[nick]=new Usuario(nick);
+            res.nick=nick;
+        }
+        else{
+            console.log("el nick "+nick+" está en uso");
+        }
+        return res;
+    }
+    this.eliminarUsuario = (nick) => {
+        return this.usuarios[nick] ? (delete this.usuarios[nick], true) : false;
+    };
+    this.usuarioActivo = (nick) =>{
+        return this.usuarios[nick] ? true : false;
+    }
+    this.obtenerUsuarios = () =>{
+        return Object.values(this.usuarios);
+        //return this.usuarios;
+    }
+    this.cantidadUsuarios = () => {
+        return Object.keys(this.usuarios).length;
+    }
+
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////
+
     this.buscarUsuario=function(obj,callback){
         buscar(this.usuarios,obj,callback);
     }
@@ -19,54 +58,28 @@ function Sistema() {
             callback(obj);
         });
     }
-    this.agregarUsuario=function(nick){
-        let res={"nick":-1};
-        if (!this.usuarios[nick]){
-            this.usuarios[nick]=new Usuario(nick);
-            res.nick=nick;
-        }
-        else{
-            console.log("el nick "+nick+" está en uso");
-        }
-        return res;
-    }
 
-
-    this.eliminarUsuario = (nick) => {
-        return this.usuarios[nick] ? (delete this.usuarios[nick], true) : false;
-    };
-    this.usuarioActivo = (nick) =>{
-        return this.usuarios[nick] ? true : false;
-    }
-    this.obtenerUsuarios = () =>{
-        return Object.values(this.usuarios);
-        //return this.usuarios;
-    }
-
-    this.cantidadUsuarios = () => {
-        return Object.keys(this.usuarios).length;
-    }
-}
-
-function Usuario(nick) {
-    this.nick = nick;
-}
-this.registrarUsuario=function(obj,callback){
-    let modelo=this;
-    if (!obj.nick){
-        obj.nick=obj.email;
-    }
-    this.cad.buscarUsuario(obj,function(usr){
-        if (!usr){
-            modelo.cad.insertarUsuario(obj,function(res){
-                callback(res);
-            });
+    this.registrarUsuario=function(obj,callback){
+        let modelo=this;
+        if (!obj.nick){
+            obj.nick=obj.email;
         }
-        else
-        {
-            callback({"email":-1});
-        }
-    });
+        this.cad.buscarUsuario(obj,function(usr){
+            if (!usr){
+                //el usuario no existe, luego lo puedo registrar
+                obj.key=Date.now().toString();
+                obj.confirmada=false;
+                modelo.cad.insertarUsuario(obj,function(res){
+                    callback(res);
+                });
+                correo.enviarEmail(obj.email,obj.key,"Confirmar cuenta");
+            }
+            else
+            {
+                callback({"email":-1});
+            }
+        });
+    }
 
     this.loginUsuario = function(obj, callback) {
         let modelo = this;
@@ -87,7 +100,25 @@ this.registrarUsuario=function(obj,callback){
         });
     }
 
+    this.confirmarUsuario=function(obj,callback){
+        let modelo=this;
+        this.cad.buscarUsuario({"email":obj.email,"confirmada":false,"key":obj.key},function(usr){
+            if (usr){
+                usr.confirmada=true;
+                modelo.cad.actualizarUsuario(usr,function(res){
+                    callback({"email":res.email}); //callback(res)
+                })
+            } else {
+                callback({"email":-1});
+            }
+        })
+    }
 }
+
+function Usuario(nick) {
+    this.nick = nick;
+}
+
 
 module.exports.Sistema=Sistema
 

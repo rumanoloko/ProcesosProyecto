@@ -1,3 +1,4 @@
+/*
 const path = require("path");
 const fs = require("fs");
 const express = require("express");
@@ -65,3 +66,18 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log(`Servidor escuchando en http://0.0.0.0:${PORT}`);
     console.log("Presiona Ctrl+C para detener el servidor");
 });
+
+*/
+function Usuario(nick) {
+    this.nick = nick;
+}
+const lista = []
+//console.log( new Usuario('a'));
+const usuario = new Usuario('asd');
+//console.log(usuario);
+a='1'
+lista[a] = new Usuario("a1");
+console.log(lista[a])
+lista['1'] = new Usuario("a2");
+console.log(lista['1'])
+'1' == 1 ? console.log(true) : console.log(false);

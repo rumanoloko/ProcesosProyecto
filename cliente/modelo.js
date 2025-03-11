@@ -27,10 +27,23 @@ function Sistema() {
     this.cantidadUsuarios = () => {
         return Object.keys(this.usuarios).length;
     }
+    this.loginUsuario=function(obj,callback){
+        this.cad.buscarUsuario({"email":obj.email,"confirmada":true},function(usr){
+            if(usr && usr.password==obj.password)
+            {
+                callback(usr);
+            }
+            else
+            {
+                callback({"email":-1});
+            }
+        });
+    }
 }
 
 function Usuario(nick) {
     this.nick = nick;
 }
+
 
 

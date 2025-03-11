@@ -16,41 +16,45 @@ function ControlWeb() {
     * */
 
     this.mostrarAgregarUsuario = function() {
-        $("#registro").empty();
-        $("g_id_onload").empty()
-        let cadena = '<div id="mAU" class="form-group">';
-        cadena += '<label for="nick">Nombre:</label>';
-        cadena += '<input type="text" class="form-control" id="nick">';
-        cadena += '<button id="btnAU" type="submit" class="btn btn-primary">Agregar</button>';
-        //cadena += '<div><a href="/auth/google"><img src="img/google_signin_web.png" style="height:40px;"></a></div>';
-        cadena += '<div><a href="/auth/google"><img src="./cliente/img/google_signin_web.png" alt="imagen de inicio de sesión de google" style="height:40px;"></a></div>';
-        cadena += '</div>';  // Este cierre es necesario
-        $("#au").append(cadena);
+        $("#au").empty();
+        let cadena = `
+        <div id="mAU" class="form-group">
+            <label for="nick">Nombre:</label>
+            <input type="text" class="form-control" id="nick">
+            <button id="btnAU" type="submit" class="btn btn-primary">Agregar</button>
+            <div>
+                <a href="/auth/google">
+                    <img src="./cliente/img/google_signin_web.png" alt="imagen de inicio de sesión de google" style="height:40px;">
+                </a>
+            </div>
+        </div>`;
+        $("#au").append(cadena); // Limpia e inserta el nuevo contenido de una vez
         $("#btnAU").on("click", function(){
             let nick = $("#nick").val();
             if(nick) {
                 rest.agregarUsuario(nick);
-                $("#mAU").remove();  // Elimina el formulario después de agregar el usuario
+                $("#mAU").remove();  // Borra el formulario después de agregar usuario
             } else {
                 alert("Por favor ingresa un nombre.");
             }
         });
-    }
+    };
+
 
 
     this.mostrarNumeroUsuarios = function() {
-        $("#registro").empty();
-        $("#nui").empty();
+        //$("#registro").empty();
+        //$("#nui").empty();
+        $("#au2").empty();
         let cadena = '<div class="form-group" id="nui">';
         cadena += '<label id="lab" for="nick">Numero de Usuarios: </label>'; // Asigna un id="lab" al label
         cadena += '</div>';
-
         $("#au2").append(cadena);
 
         rest.numeroUsuarios(function(data) {
             if (data) {
-                let currentText = $("#lab").text(); // Obtener el texto actual del label
-                $("#lab").text(currentText + data.cantidad);
+                //let currentText = $("#lab").text(); // Obtener el texto actual del label
+                $("#lab").text(/*currentText + */data.cantidad);
             } else {
                 console.log("Error al obtener la cantidad de usuarios");
             }
@@ -138,20 +142,35 @@ function ControlWeb() {
         let cadena = `<div><h1>${msg}</h1></div>`;
         $("#au6").append(cadena);
     };
-
-    this.salir = function() {
-        let nick = $.cookie("nick");
+    this.salir=function(){
+    //localStorage.removeItem("nick");
         $.removeCookie("nick");
+        location.reload();
+        rest.cerrarSesion();
+    }
+    this.cerrarSesion=function(){
+        $.getJSON("/cerrarSesion",function(){
+            console.log("Sesión cerrada");
+            $.removeCookie("nick");
+        });
+    }
 
-        let mensaje = nick
-            ? `Hasta luego, ${nick}. ¡Esperamos verte pronto!`
-            : "Has cerrado sesión. ¡Vuelve pronto!";
 
-        // Usa la misma estructura que `mostrarMensaje`
-        $("#au6").html(`<div><h1>${mensaje}</h1></div>`);
+    /*
+        this.salir = function() {
+            let nick = $.cookie("nick");
+            $.removeCookie("nick");
 
-        setTimeout(() => location.reload(), 2000); // Recarga después de 2 segundos
-    };
+            let mensaje = nick
+                ? `Hasta luego, ${nick}. ¡Esperamos verte pronto!`
+                : "Has cerrado sesión. ¡Vuelve pronto!";
+
+            // Usa la misma estructura que `mostrarMensaje`
+            $("#au6").html(`<div><h1>${mensaje}</h1></div>`);
+
+            setTimeout(() => location.reload(), 2000); // Recarga después de 2 segundos
+        };
+        */
     this.mostrarRegistro=function(){
         $("#au").empty()
         $("#au2").empty();
@@ -174,25 +193,24 @@ function ControlWeb() {
         });
     }
 
-    this.mostrarLogin = function() {
-        if ($.cookie('nick')) {
+    this.mostrarLogin=function(){
+        if ($.cookie('nick')){
             return true;
-        }
+        };
         $("#fmLogin").remove();
-        $("#registro").load("./cliente/login.html", function() {
-            $("#btnLogin").on("click", function(e) {
-                e.preventDefault();
-                let email = $("#email").val();
-                let pwd = $("#pwd").val();
-                if (email && pwd) {
-                    rest.loginUsuario(email, pwd);
-                    console.log(email + " " + pwd);
+        $("#registro").load("./cliente/login.html",function(){
+            $("#btnLogin").on("click",function(){
+                let email=$("#email").val();
+                let pwd=$("#pwd").val();
+                if (email && pwd){
+                    rest.loginUsuario(email,pwd);
+                    console.log(email+" "+pwd);
                 }
             });
         });
     }
     this.limpiarInterfaz = function() {
-        $("#au").empty()
+        $("#au").empty();
         $("#au2").empty();
         $("#au3").empty();
         $("#au4").empty();

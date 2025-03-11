@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const path = require('path');
 //const modelo = require("..\\ProcesosProyecto-master\\servidor\\modelo.js");
+const session = require('express-session');
 const passport = require("passport");
 const cookieSession=require("cookie-session");
 require("./servidor/passport-setup.js");
@@ -10,7 +11,15 @@ require("./servidor/passport-setup.js");
 const modelo = require(path.join(__dirname, "servidor", "modelo.js"));
 const PORT = process.env.PORT || 3000;
 const bodyParser=require("body-parser");
-
+const LocalStrategy = require('passport-local').Strategy;
+const haIniciado=function(request,response,next){
+    if (request.user){
+        next();
+    }
+    else{
+        response.redirect("/")
+    }
+}
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + "/"));
@@ -20,7 +29,12 @@ app.use(cookieSession({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.post('/loginUsuario',passport.authenticate("local",{failureRedirect:
+        "/fallo",successRedirect: "/ok"})
+);
+app.get("/ok",function(request,response){
+    response.send({nick:request.user.email})
+});
 let sistema = new modelo.Sistema();
 
 app.get("/", function(request,response){
@@ -31,6 +45,7 @@ app.get("/", function(request,response){
 
 app.get("/agregarUsuario/:nick",function(request,response){
     let nick=request.params.nick;
+    console.log(nick)
     let res=sistema.agregarUsuario(nick);
     response.send(res);
 });
@@ -41,6 +56,10 @@ app.get("/obtenerUsuarios",function(request,response){
         res.push({nick : usuario.nick});
     })
     response.json(res);
+});
+app.get("/obtenerUsuarios",haIniciado,function(request,response){
+    let lista=sistema.obtenerUsuarios();
+    response.send(lista);
 });
 
 app.get("/usuarioActivo/:nick",function(request,response){
@@ -94,11 +113,50 @@ app.post("/registrarUsuario",function(request,response){
         response.send({"nick":res.email});
     });
 });
+app.get("/confirmarUsuario/:email/:key",function(request,response){
+    let email=request.params.email;
+    let key=request.params.key;
+    sistema.confirmarUsuario({"email":email,"key":key},function(usr){
+        if (usr.email!=-1){
+            response.cookie('nick',usr.email);
+        }
+        response.redirect('/');
+    });
+})
 
 app.post('/loginUsuario', passport.authenticate("local", { failureRedirect: "/fallo", successRedirect: "/ok" }));
 app.get("/ok", function(req, res) {
     res.send({ nick: req.user.email });
 });
+
+passport.use(new LocalStrategy({usernameField:"email",passwordField:"password"},
+    function(email,password,done){
+        sistema.loginUsuario({"email":email,"password":password},function(user){
+            return done(null,user);
+        })
+    }
+));
+app.get("/cerrarSesion",haIniciado,function(request,response){
+    let nick=request.user.nick;
+    request.logout();
+    response.redirect("/");
+    if (nick){
+        sistema.eliminarUsuario(nick);
+    }
+});
+
+
+app.use(session({
+    secret: 'mi_super_secreto',  // Cambia esto por un valor seguro
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Asegúrate de usar `true` solo si estás en HTTPS
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 
 
 
