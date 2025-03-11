@@ -19,7 +19,7 @@ function ClienteRest(){
                 console.log("El nick ya está ocupado");
             }
             msg = "Bienvenido al sistema, "+nick;
-            //cw.mostrarMensaje(msg);
+            cw.mostrarMensaje(msg);
         })
     }
     this.agregarUsuario2 = function(nick) {

@@ -28,6 +28,12 @@ function CAD() {
     this.insertarUsuario=function(usuario,callback){
         insertar(this.usuarios,usuario,callback);
     }
+    this.actualizarUsuario=function(obj,callback){
+        actualizar(this.usuarios,obj,callback);
+    }
+    this.buscarUsuario = function(criterio, callback) {
+        buscar(this.usuarios, criterio, callback);
+    }
 }
 
 function buscarOCrear(coleccion, criterio, callback) {
@@ -67,6 +73,18 @@ function buscarOCrear(coleccion, criterio, callback) {
     }
 }
 
+function actualizar(coleccion,obj,callback){
+    coleccion.findOneAndUpdate({_id:ObjectId(obj._id)}, {$set: obj},
+        {upsert: false,returnDocument:"after",projection:{email:1}},
+        function(err,doc) {
+            if (err) { throw err; }
+            else {
+                console.log("Elemento actualizado");
+                callback({email:doc.value.email});
+            }
+        });
+}
+
 function buscar(coleccion,criterio,callback){
     coleccion.find(criterio).toArray(function(error,usuarios){
         if (usuarios.length==0){
@@ -88,9 +106,6 @@ function insertar(coleccion,elemento,callback){
             callback(elemento);
         }
     });
-}
-this.buscarUsuario = function(criterio, callback) {
-    buscar(this.usuarios, criterio, callback);
 }
 
 

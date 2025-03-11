@@ -1,10 +1,17 @@
-const passport=require("passport");
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 //const {GoogleOneTapStrategy} = require("passport-google-one-tap");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 //clear
 // const { OAuth2Client } = require('google-auth-library');
 const GoogleOneTapStrategy = require("passport-google-one-tap").GoogleOneTapStrategy;
 //const GoogleOneTapStrategy = require('passport-google-one-tap').Strategy;
+passport.use(new LocalStrategy({usernameField:"email",passwordField:"password"},function(email,password,done){
+        sistema.loginUsuario({"email":email,"password":password},function(user){
+            return done(null,user);
+        })
+    }
+));
 
 passport.serializeUser(function(user, done) {
     done(null, user);
