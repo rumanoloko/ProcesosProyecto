@@ -20,7 +20,7 @@ passport.deserializeUser(function(user, done) {
     done(null, user);
 });
 
-
+/*
 passport.use(new GoogleOneTapStrategy(
         {
             //client_id:"xxxxxxx.apps.googleusercontent.com", //local
@@ -34,6 +34,7 @@ passport.use(new GoogleOneTapStrategy(
         }
     )
 );
+ */
 passport.use(new GoogleStrategy({
         clientID: "593170222026-hl59nasvk5e766r4g2e8jmbmn2dtf8ah.apps.googleusercontent.com",
         clientSecret: "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",

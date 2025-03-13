@@ -1,5 +1,8 @@
 const datos=require("./cad.js");
 const correo = require("./email.js");
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 function Sistema() {
     this.usuarios=[];
     this.cad=new datos.CAD();
@@ -13,6 +16,23 @@ function Sistema() {
     /////////////////////////////////////////////////////
     /////////////////////////////////////////////////////
     /////////////////////////////////////////////////////
+
+    this.usuarioGoogle=function(usr,callback){
+        this.cad.buscarOCrearUsuario(usr,function(obj){
+            callback(obj);
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
     this.agregarUsuario=function(nick){
         let res={"nick":-1};
         if (!this.usuarios[nick]){
@@ -38,13 +58,6 @@ function Sistema() {
         return Object.keys(this.usuarios).length;
     }
 
-    /////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////
-
     this.buscarUsuario=function(obj,callback){
         buscar(this.usuarios,obj,callback);
     }
@@ -52,13 +65,6 @@ function Sistema() {
     this.insertarUsuario=function(usuario,callback){
         insertar(this.usuarios,usuario,callback);
     }
-
-    this.usuarioGoogle=function(usr,callback){
-        this.cad.buscarOCrearUsuario(usr,function(obj){
-            callback(obj);
-        });
-    }
-
     this.registrarUsuario=function(obj,callback){
         let modelo=this;
         if (!obj.nick){
@@ -81,24 +87,47 @@ function Sistema() {
         });
     }
 
-    this.loginUsuario = function(obj, callback) {
-        let modelo = this;
-        this.cad.buscarUsuario({ "email": obj.email, "confirmada": true }, function(usr) {
-            if (!usr) {
-                callback({ "email": -1 });
-                return -1;
-            } else {
-                bcrypt.compare(obj.password, usr.password, function(err, result) {
-                    if (result) {
-                        callback(usr);
-                        modelo.agregarUsuario(usr);
-                    } else {
-                        callback({ "email": -1 });
-                    }
-                });
+
+
+
+
+    function buscar(coleccion,criterio,callback){
+        coleccion.find(criterio).toArray(function(error,usuarios){
+            if (usuarios.length==0){
+                callback(undefined);
+            }
+            else{
+                callback(usuarios[0]);
             }
         });
     }
+    function insertar(coleccion,elemento,callback){
+        coleccion.insertOne(elemento,function(err,result){
+            if(err){
+                console.log("error");
+            }
+            else{
+                console.log("Nuevo elemento creado");
+                callback(elemento);
+            }
+        });
+    }
+
+
+
+    this.loginUsuario=function(obj,callback){
+        this.cad.buscarUsuario({"email":obj.email,"confirmada":true},function(usr){
+            if(usr && usr.password==obj.password)
+            {
+                callback(usr);
+            }
+            else
+            {
+                callback({"email":-1});
+            }
+        });
+    }
+
 
     this.confirmarUsuario=function(obj,callback){
         let modelo=this;

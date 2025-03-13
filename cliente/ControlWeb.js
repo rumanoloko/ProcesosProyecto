@@ -38,6 +38,8 @@ function ControlWeb() {
                 alert("Por favor ingresa un nombre.");
             }
         });
+
+
     };
 
 
@@ -125,16 +127,54 @@ function ControlWeb() {
     };
 
     this.comprobarSesion = function() {
+        this.limpiarInterfaz()
         $("#registro").empty();
         let nick = $.cookie("nick");
         if(nick) {
             cw.mostrarMensaje("Bienvenido al sistema, "+nick)
         }
         else{
-            cw.mostrarUsuarioActivo();
+            cw.mostrarRegistro();
         }
-
     }
+
+    this.limpiarInterfaz = function() {
+        $("#au").empty();
+        $("#au2").empty();
+        $("#au3").empty();
+        $("#au4").empty();
+        $("#au5").empty();
+        $("#au6").empty();
+        $("#au7").empty();
+        $("#h3").empty();
+        $("#registro").empty();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    this.salir=function(){
+        //localStorage.removeItem("nick");
+        $.removeCookie("nick");
+        location.reload();
+        rest.cerrarSesion();
+    }
+    this.cerrarSesion = function() {
+        rest.cerrarSesion();
+        localStorage.removeItem("nick");
+        this.mostrarLogin();
+    }
+
+
 
     this.mostrarMensaje = function(msg) {
         $("#registro").empty();
@@ -142,18 +182,6 @@ function ControlWeb() {
         let cadena = `<div><h1>${msg}</h1></div>`;
         $("#au6").append(cadena);
     };
-    this.salir=function(){
-    //localStorage.removeItem("nick");
-        $.removeCookie("nick");
-        location.reload();
-        rest.cerrarSesion();
-    }
-    this.cerrarSesion=function(){
-        $.getJSON("/cerrarSesion",function(){
-            console.log("Sesión cerrada");
-            $.removeCookie("nick");
-        });
-    }
 
 
     /*
@@ -171,54 +199,59 @@ function ControlWeb() {
             setTimeout(() => location.reload(), 2000); // Recarga después de 2 segundos
         };
         */
-    this.mostrarRegistro=function(){
-        $("#au").empty()
-        $("#au2").empty();
-        $("#au3").empty();
-        $("#au4").empty();
-        $("#au5").empty();
-        $("#au6").empty();
-        $("#au7").empty();
-        $("#h3").empty();
-        $("#registro").load("./cliente/registro.html",function(){
-            $("#btnRegistro").on("click",function(e){
-                e.preventDefault();
-                let email=$("#email").val();
-                let pwd=$("#pwd").val();
-                if (email && pwd){
-                    //rest.registrarUsuario(nick);
-                    console.log(email+" "+pwd);
-                }
-            });
-        });
-    }
-
-    this.mostrarLogin=function(){
-        if ($.cookie('nick')){
-            return true;
-        };
-        $("#fmLogin").remove();
-        $("#registro").load("./cliente/login.html",function(){
-            $("#btnLogin").on("click",function(){
-                let email=$("#email").val();
-                let pwd=$("#pwd").val();
-                if (email && pwd){
-                    rest.loginUsuario(email,pwd);
-                    console.log(email+" "+pwd);
-                }
-            });
-        });
-    }
-    this.limpiarInterfaz = function() {
-        $("#au").empty();
-        $("#au2").empty();
-        $("#au3").empty();
-        $("#au4").empty();
-        $("#au5").empty();
-        $("#au6").empty();
-        $("#au7").empty();
-        $("#h3").empty();
+    this.mostrarRegistro = function() {
         $("#registro").empty();
+        $("#registro").load("./cliente/registro.html", function() {
+            $("#registroForm").on("submit", function(e) {
+                e.preventDefault();
+                let email = $("#email").val();
+                let password = $("#password").val();
+                if (email && password) {
+                    rest.registrarUsuario(email, password);
+                }
+            });
+        });
+    };
+
+    this.mostrarLogin = function() {
+        $("#contenido").empty();
+        $("#contenido").append(`
+        <div id="loginForm" class="mx-auto" style="max-width: 500px;">
+            <h3 class="text-center">Inicio de Sesión</h3>
+            <form>
+                <div class="form-group">
+                    <label for="email">Correo Electrónico:</label>
+                    <input type="email" class="form-control" id="email" placeholder="Introduce tu correo electrónico" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" class="form-control" id="password" placeholder="Introduce tu contraseña" required>
+                </div>
+                <div class="text-center">
+                    <button type="submit" id="btnLogin" class="btn btn-primary">Iniciar Sesión</button>
+                </div>
+            </form>
+        </div>
+    `);
+
+        $("#loginForm").on("submit", function(e) {
+            e.preventDefault();
+            let email = $("#email").val();
+            let password = $("#password").val();
+            if (email && password) {
+                rest.loginUsuario({email: email, password: password});
+            }
+        });
+    };
+
+
+    this.mostrarModal=function(m){
+        $("#msg").remove();
+        let cadena="<div id='msg'>"+m+"</div>";
+        $('#mBody').append(cadena)
+        $('#miModal').modal();
+        // $('#btnModal').on('click',function(){
+        // })
     }
 
 }
