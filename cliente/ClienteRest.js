@@ -88,7 +88,9 @@ function ClienteRest(){
                     cw.limpiarInterfaz();
                     cw.mostrarMensaje("Bienvenido al sistema, " + data.nick);
                 } else {
-                    console.log("El nick está ocupado");
+                    console.log("Ya hay un usuario registrado con ese email");
+                    //cw.mostrarMensajeLogin("Ya hay un usuario registrado con ese email");
+                    cw.mostrarModal("No se ha podido registrar el usuario");
                 }
             },
             error: function(xhr, textStatus, errorThrown) {
@@ -112,7 +114,9 @@ function ClienteRest(){
                     cw.limpiarInterfaz();
                     cw.mostrarMensaje("Bienvenido al sistema, " + data.nick);
                 } else {
-                    console.log("Inicio de sesión fallido: Credenciales incorrectas");
+                    console.log("No existe un usuario preexistente con ese email");
+                    //cw.mostrarMensajeLogin("No hay un usuario preexistente con ese email");
+                    cw.mostrarModal("No se ha podido inicar sesión con el usuario");
                 }
             },
             error: function(xhr, textStatus, errorThrown) {

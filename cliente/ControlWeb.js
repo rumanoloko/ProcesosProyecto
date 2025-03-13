@@ -231,8 +231,7 @@ function ControlWeb() {
                     <button type="submit" id="btnLogin" class="btn btn-primary">Iniciar Sesión</button>
                 </div>
             </form>
-        </div>
-    `);
+        </div>`);
 
         $("#loginForm").on("submit", function(e) {
             e.preventDefault();
@@ -243,7 +242,6 @@ function ControlWeb() {
             }
         });
     };
-
 
     this.mostrarModal=function(m){
         $("#msg").remove();
