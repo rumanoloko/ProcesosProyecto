@@ -1,5 +1,8 @@
 
 function ClienteRest(){
+    this.enviarJwt = function(data) {
+        $.cookie("token",data.data);
+    }
     this.comprobarSesion=function() {
         let nick= $.cookie('nick');
         if(nick) {
@@ -85,6 +88,8 @@ function ClienteRest(){
             success: function(data) {
                 if (data.nick != -1) {
                     $.cookie("nick", data.nick);
+                    ws.email = data.email;
+
                     cw.limpiarInterfaz();
                     cw.mostrarMensaje("Bienvenido al sistema, " + data.nick);
                 } else {
@@ -111,12 +116,15 @@ function ClienteRest(){
                 if (data.nick != -1) {
                     console.log("Usuario " + data.nick + " ha iniciado sesión");
                     $.cookie("nick", data.nick);
+
+                    console.log("EMAIL=" + data.nick);
+                    ws.setEmail(data.nick); // Asignar email al objeto ws
                     cw.limpiarInterfaz();
                     cw.mostrarMensaje("Bienvenido al sistema, " + data.nick);
+                    cw.mostrarCrearPartida()
                 } else {
                     console.log("No existe un usuario preexistente con ese email");
-                    //cw.mostrarMensajeLogin("No hay un usuario preexistente con ese email");
-                    cw.mostrarModal("No se ha podido inicar sesión con el usuario");
+                    cw.mostrarModal("No se ha podido iniciar sesión con el usuario");
                 }
             },
             error: function(xhr, textStatus, errorThrown) {
@@ -126,6 +134,23 @@ function ClienteRest(){
             contentType: 'application/json'
         });
     };
+    this.obtenerListaPartidas = function(callback) {
+        $.ajax({
+            type: "GET",
+            url: "/api/partidas", // Endpoint para obtener la lista de partidas
+            success: function(lista) {
+                console.log("Lista de códigos recibida desde REST:", lista);
+                callback(lista); // Pasa la lista al controlador que manejará la visualización
+            },
+            error: function(error) {
+                console.error("Error al obtener la lista de partidas:", error);
+                callback([]); // Devuelve una lista vacía en caso de error
+            }
+        });
+    };
+
+
+
 
     this.cerrarSesion=function(){
         $.getJSON("/cerrarSesion",function(){

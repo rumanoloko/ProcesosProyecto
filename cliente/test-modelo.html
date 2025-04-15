@@ -1,0 +1,21 @@
+<html>
+<head>
+    <script src="modelo2.js"></script>
+</head>
+<body>
+<script>
+    sistema = new Sistema();
+    usr1 = new Usuario("Pepe");
+    sistema.agregarUsuario(usr1);
+    usr2 = new Usuario("Luis");
+    sistema.agregarUsuario(usr2);
+
+    console.log(sistema.obtenerUsuarios()); // Deberías ver los usuarios Pepe y Luis
+    let codigo = sistema.crearPartida("Pepe"); // Crea una partida para Pepe
+    console.log(codigo);
+    console.log(sistema.unirAPartida("Luis", codigo)); // Luis se une a la partida
+    console.log(sistema.partidas[codigo].jugadores); // Deberías ver a Pepe y Luis en la partida
+    console.log(sistema.obtenerPartidasDisponibles()); // Deberías ver la lista de partidas disponibles
+</script>
+</body>
+</html>

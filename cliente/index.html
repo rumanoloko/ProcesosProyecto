@@ -29,30 +29,44 @@
     <div id="au5"></div>
     <div id="au6"></div>
     <div id="au7"></div>
+
+    <!-- Fragmento Google Sign-In añadido -->
     <div id="g_id_onload"
          data-client_id="593170222026-hl59nasvk5e766r4g2e8jmbmn2dtf8ah.apps.googleusercontent.com"
-         data-login_uri="http://localhost:3000/oneTap/callback"
-         data-skip_prompt_cookie="nick">
+         data-context="use"
+         data-ux_mode="popup"
+         data-login_uri="http://localhost:3000/google/callback"
+         data-callback="onSignIn"
+         data-auto_prompt="false">
     </div>
+    <div class="g_id_signin"
+         id="g_id_signin"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="outline"
+         data-text="signin_with"
+         data-size="large"
+         data-logo_alignment="left">
+    </div>
+
     <div id="registro"></div>
+    <div id="login"></div>
+    <div id="listaPartidas"></div>
 </div>
 
 <!-- The Modal -->
 <div class="modal fade" id="miModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <!-- Modal Header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Atención</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <!-- Modal body -->
             <div class="modal-body" id="mBody">
                 <!-- Aquí se añadirá el mensaje -->
             </div>
-            <!-- Modal footer -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
             </div>
@@ -60,26 +74,36 @@
     </div>
 </div>
 
-<!-- Scripts (Colocados al final para mejorar rendimiento) -->
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./cliente/modelo.js"></script>
 <script src="./cliente/ControlWeb.js"></script>
 <script src="./cliente/clienteRest.js"></script>
+<script src="./cliente/clienteWS.js"></script>
+<script src="./cliente/game.js"></script>
 
 <script>
     $(document).ready(function () {
-        rest = new ClienteRest();
-        cw = new ControlWeb();
-        //cw.mostrarAgregarUsuario();
-        //cw.mostrarUsuarioActivo();
-        //cw.mostrarEliminarUsuario();
-        //cw.mostrarObtenerUsuarios();
-        // Definición de la función mostrarModal
+        function ini() {
+            cw = new ControlWeb();
+            rest = new ClienteRest();
+            cw.mostrarLogin();
+            ws = new ClienteWS();
+            ws.setEmail("pyotrvladimir531@gmail.com"); // Asegúrate de definir el email del usuario
+            let listaElement = document.getElementById("listaPartidas");
+            if (listaElement) {
+                console.log("Elemento 'listaPartidas' encontrado exitosamente");
+            } else {
+                console.error("Elemento 'listaPartidas' NO encontrado");
+            }
+        }
+        ini();
+
         cw.mostrarModal = function(m) {
             $("#msg").remove();
             let cadena = "<div id='msg'>" + m + "</div>";
@@ -87,11 +111,9 @@
             $('#miModal').modal('show'); // Muestra el modal
         }
 
-        // Definición del evento para cerrar el modal
         $(document).on('click', '[data-dismiss="modal"]', function () {
             $('#miModal').modal('hide'); // Cierra el modal
         });
-
     });
 </script>
 

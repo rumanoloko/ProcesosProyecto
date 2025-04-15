@@ -2,7 +2,7 @@ const fs=require("fs");
 const express = require('express');
 const app = express();
 const path = require('path');
-//const modelo = require("..\\ProcesosProyecto-master\\servidor\\modelo.js");
+//const modelo = require("..\\ProcesosProyecto-master\\servidor\\modelo2.js");
 const session = require('express-session');
 const passport = require("passport");
 const cookieSession=require("cookie-session");
@@ -12,6 +12,20 @@ require("./servidor/passport-setup.js");
 const modelo = require(path.join(__dirname, "servidor", "modelo.js"));
 const PORT = process.env.PORT || 3000;
 const bodyParser=require("body-parser");
+const httpServer = require('http').Server(app);
+const { Server } = require("socket.io");
+const moduloWS = require("./servidor/servidorWS.js");
+let ws = new moduloWS.WSServer();
+let io = new Server();
+let sistema = new modelo.Sistema();
+httpServer.listen(PORT, () => {
+    console.log(`App está escuchando en el puerto ${PORT}`);
+    console.log('Ctrl+C para salir');
+});
+io.listen(httpServer);
+ws.lanzarServidor(io,sistema, ws);
+//ws.lanzarServidor(io,sistema);
+
 const haIniciado=function(request,response,next){
     if (request.user){
         next();
@@ -20,7 +34,6 @@ const haIniciado=function(request,response,next){
         response.redirect("/")
     }
 }
-let sistema = new modelo.Sistema();
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + "/"));
@@ -38,16 +51,7 @@ app.get("/agregarUsuario/:nick",function(request,response){
     let res=sistema.agregarUsuario(nick);
     response.send(res);
 });
-/*
-app.get("/obtenerUsuarios",function(request,response){
-    let res=[];
-    Object.values(sistema.obtenerUsuarios()).forEach(usuario=>{
-        res.push({nick : usuario.nick});
-    })
-    response.json(res);
-});
 
- */
 app.get("/obtenerUsuarios",haIniciado,function(request,response){
     let lista=sistema.obtenerUsuarios();
     response.send(lista);
@@ -83,58 +87,11 @@ app.get("/good", function(request,response){
         response.redirect('/');
     });
 });
-/*
-app.get("/good", function(request, response){
-    let email = request.user.emails[0].value;
-    if (email) {
-        sistema.usuarioGoogle({"email": email}, function(obj){
-            console.log(`Éxito: Usuario autenticado con email ${obj.email}`);
-            response.cookie('nick', obj.email);
-            response.redirect('/');
-        });
-    } else {
-        let nick = request.user.emails[0].value;
-        if (nick) {
-            sistema.agregarUsuario(nick);
-            console.log(`Éxito: Usuario autenticado con email ${nick}`);
-            response.cookie('nick', nick);
-            response.redirect('/');
-        }
-    }
-});
 
- */
-/*
-app.get("/good", function(request,response){
-    let nick=request.user.emails[0].value;
-    if (nick){
-        sistema.agregarUsuario(nick);
-    }
-    //console.log(request.user.emails[0].value);
-    response.cookie('nick',nick);
-    response.redirect('/');
-});
-
- */
 app.get("/fallo",function(request,response){
     console.log("Fallaste otra vez boludo de la chingada madre")
     response.send({nick:"nook"})
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.post('/loginUsuario',passport.authenticate("local",{failureRedirect:
         "/fallo",successRedirect: "/ok"})
@@ -148,12 +105,6 @@ app.get("/", function(request,response){
     response.setHeader("Content-type","text/html");
     response.send(contenido);
 });
-
-app.listen(PORT, () => {
-    console.log(`App está escuchando en el puerto ${PORT}`);
-    console.log('Ctrl+C para salir');
-});
-
 app.get("/fallo",function(request,response){
     response.send({nick:"nook"})
 });
@@ -187,20 +138,16 @@ app.get("/confirmarUsuario/:email/:key",function(request,response){
         response.redirect('/');
     });
 })
-/*
-app.post("/loginUsuario", function(request, response) {
-    sistema.loginUsuario(request.body, function(res) {
-        if (res.email != -1) {
-            console.log("Inicio de sesión exitoso para: ", res.email);
-            response.send({"nick": res.email});
-        } else {
-            console.log("Credenciales incorrectas para: ", request.body.email);
-            response.send({"nick": -1});
-        }
-    });
+
+app.get('/api/partidas', function(req, res) {
+    let partidas = sistema.obtenerPartidasDisponibles(); // Llama al método de la capa lógica
+    if (partidas && partidas.length > 0) {
+        res.status(200).send(partidas); // Envía la lista al cliente
+    } else {
+        res.status(404).send({ mensaje: "No hay partidas disponibles en este momento." });
+    }
 });
 
- */
 app.post('/loginUsuario',passport.authenticate("local",
     {failureRedirect:" /fallo",successRedirect: "/ok"})
 );
@@ -220,15 +167,12 @@ app.get("/cerrarSesion",haIniciado,function(request,response){
         sistema.eliminarUsuario(nick);
     }
 });
-
-
 app.use(session({
     secret: 'mi_super_secreto',  // Cambia esto por un valor seguro
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false } // Asegúrate de usar `true` solo si estás en HTTPS
 }));
-
 app.get("/cerrarSesion", function(request, response) {
     if (request.isAuthenticated()) {
         let nick = request.user.nick;
@@ -245,9 +189,12 @@ app.get("/cerrarSesion", function(request, response) {
     }
 });
 
-
-
-
-
-
-
+app.post('/enviarJwt',function(request,response){
+    let jswt=request.body.jwt;
+    let user=JSON.parse(atob(jswt.split(".")[1]));
+    let email=user.email;
+    sistema.usuarioGoogle({"email":email},function(obj){
+        let token=jwt.sign({email:obj.email,id:obj._id}," tu-clave-secreta");
+        response.header("authtoken",token).json({error:null,data:token,email:obj.email});
+    })
+});

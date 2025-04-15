@@ -1,21 +1,89 @@
 function ControlWeb() {
-    /*
-        $('#bnv').remove();
-        $('#mAU').remove();
-        let cadena='<div id="mAU">';
-        cadena = cadena + '<div class="card"><div class="card-body">';
-        cadena = cadena +'<div class="form-group">';
-        cadena = cadena + '<label for="nick">Nick:</label>';
-        cadena = cadena + '<p><input type="text" class="form-control" id="nick" placeholder="Introduce un nombre"></p>';
-        cadena = cadena + '<button id="btnAU" type="submit" class="btn btn-primary">Guardar</button>';
-        cadena=cadena+'<div><a href="/auth/google"><img src="./cliente/img/google_signin_web.png" style="height:40px;"></a></div>';
-        cadena = cadena + '</div>';
-        cadena = cadena + '</div></div></div>';
-        $("#au").append(cadena);
+
+    this.init=function(){
+        let cw=this;
+        google.accounts.id.initialize({
+            client_id:"593170222026-hl59nasvk5e766r4g2e8jmbmn2dtf8ah.apps.googleusercontent.com",
+            auto_select:false,
+            callback:cw.handleCredentialsResponse
+        });
+        google.accounts.id.prompt();
+        this.handleCredentialsResponse=function(response){
+            let jwt=response.credential;
+            //let user=JSON.parse(atob(jwt.split(".")[1]));
+            //console.log(user.name);
+            //console.log(user.email);
+            //console.log(user.picture);
+            rest.enviarJwt(jwt);
+        }
     }
-    * */
+
+    this.mostrarCrearPartida = function() {
+        $("#au").empty();
+        $("#au2").empty();
+        $("#au3").empty();
+        $("#au4").empty();
+        $("#au5").empty();
+        $("#au7").empty();
+        $("#h3").empty();
+        $("#g_id_onload").empty();
+        $("#registro").empty();
+        $("#login").empty();
+        $("#listaPartidas").empty();
+        let cadena = `
+        <div id="crearPartida" class="form-group text-center">
+            <button id="btnCrearPartida" class="btn btn-primary">Crear Partida</button>
+            <div id="esperandoRival" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <p>Esperando rival...</p>
+                <img src="./cliente/img/loading.gif" alt="Esperando rival">
+            </div>
+        </div>`;
+        $("#au7").append(cadena);
+
+        $("#btnCrearPartida").on("click", function() {
+            $("#btnCrearPartida").hide(); // Oculta el botón
+            $("#esperandoRival").show(); // Muestra la animación de espera
+            ws.crearPartida(); // Envía la solicitud para crear la partida
+        });
+    };
+
+
+    this.mostrarListaPartidas2 = function(lista) {
+        this.limpiarInterfaz();
+        $("#au2").empty();
+        let cadena = `
+            <div id="listaPartidas" class="form-group">
+                <h3>Partidas Disponibles</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                lista.forEach(partida => {
+                    cadena += `
+                        <tr>
+                            <td>${partida.codigo}</td>
+                            <td><button class="btn btn-success unirsePartida" data-codigo="${partida.codigo}">Unirse</button></td>
+                        </tr>`;
+                });
+                cadena += `
+                    </tbody>
+                </table>
+            </div>`;
+        $("#au2").append(cadena);
+
+        $(".unirsePartida").on("click", function() {
+            let codigo = $(this).data("codigo");
+            ws.unirAPartida(codigo); // Envía la solicitud para unirse a la partida
+        });
+    };
+
 
     this.mostrarAgregarUsuario = function() {
+        this.limpiarInterfaz()
         $("#au").empty();
         let cadena = `
         <div id="mAU" class="form-group">
@@ -38,15 +106,54 @@ function ControlWeb() {
                 alert("Por favor ingresa un nombre.");
             }
         });
+    };
 
+    this.mostrarListaPartidas = function(lista) {
+        this.limpiarInterfaz(); // Limpia la interfaz antes de mostrar la lista
+        console.log("Mostrando lista de partidas...");
 
+        // Validar que 'lista' es un array válido
+        if (!Array.isArray(lista)) {
+            console.error("La variable lista no es un array o es undefined:", lista);
+            return;
+        }
+
+        let listaElement = document.getElementById("listaPartidas");
+        if (!listaElement) {
+            console.error("Error: Contenedor 'listaPartidas' no encontrado.");
+            return;
+        }
+
+        //listaElement.innerHTML = "";
+
+        // Iterar por cada objeto en la lista y crear un botón con el código de la partida
+        lista.forEach(function(partida) {
+            // Crear un elemento botón
+            let button = document.createElement("button");
+            button.textContent = partida.codigo; // El texto del botón es el código de la partida
+            button.className = "btn btn-primary m-2"; // Opcional: Estilo para los botones
+
+            // Agregar el evento clic para intentar unirse a la partida
+            button.addEventListener("click", function() {
+                console.log("Intentando unirse a la partida con código:", partida.codigo);
+                ws.unirAPartida(partida.codigo); // Llama a la función para unirse a la partida
+            });
+
+            listaElement.appendChild(button);
+        });
+
+        console.log("Lista de botones mostrada correctamente:", lista.map(partida => partida.codigo));
     };
 
 
 
+
+
+
+
+
     this.mostrarNumeroUsuarios = function() {
-        //$("#registro").empty();
-        //$("#nui").empty();
+        this.limpiarInterfaz()
         $("#au2").empty();
         let cadena = '<div class="form-group" id="nui">';
         cadena += '<label id="lab" for="nick">Numero de Usuarios: </label>'; // Asigna un id="lab" al label
@@ -64,6 +171,7 @@ function ControlWeb() {
     };
 
     this.mostrarUsuarioActivo = function() {
+        this.limpiarInterfaz()
         $("#registro").empty();
         let cadena = '<div id="mAU3" class="form-group">';
         cadena += '<label for="nick">Buscar usuario activo:</label>';
@@ -85,6 +193,7 @@ function ControlWeb() {
     };
 
     this.mostrarEliminarUsuario = function() {
+        this.limpiarInterfaz()
         $("#registro").empty();
         let cadena = '<div id="mAU4" class="form-group">';
         cadena += '<label for="nick">Nombre del usuario a eliminar:</label>';
@@ -106,6 +215,7 @@ function ControlWeb() {
     };
 
     this.mostrarObtenerUsuarios = function() {
+        this.limpiarInterfaz()
         $("#registro").empty();
         $("#nui5").empty();
         let cadena = '<div class="form-group" id="nui5">';
@@ -147,20 +257,11 @@ function ControlWeb() {
         $("#au6").empty();
         $("#au7").empty();
         $("#h3").empty();
+        $("#g_id_onload").empty();
         $("#registro").empty();
+        $("#login").empty();
+        $("#listaPartidas").empty();
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     this.salir=function(){
         //localStorage.removeItem("nick");
@@ -169,38 +270,33 @@ function ControlWeb() {
         rest.cerrarSesion();
     }
     this.cerrarSesion = function() {
+        this.limpiarInterfaz()
         rest.cerrarSesion();
         localStorage.removeItem("nick");
         this.mostrarLogin();
     }
 
-
-
     this.mostrarMensaje = function(msg) {
+        //this.limpiarInterfaz()
         $("#registro").empty();
         console.log("Mensaje recibido:", msg); // Verifica el valor de msg en la consola
-        let cadena = `<div><h1>${msg}</h1></div>`;
+        let cadena = `<div class="text-center"><h3>${msg}</h3></div>`;
+        $("#au6").empty();
         $("#au6").append(cadena);
+        //this.mostrarCrearPartida();
+    };
+    this.mostrarMensaje2 = function(msg) {
+        //this.limpiarInterfaz()
+        //$("#registro").empty();
+        console.log("Mensaje recibido:", msg); // Verifica el valor de msg en la consola
+        let cadena = `<div class="text-center"><h3>${msg}</h3></div>`;
+        $("#au6").empty();
+        $("#au6").append(cadena);
+        //this.mostrarCrearPartida();
     };
 
-
-    /*
-        this.salir = function() {
-            let nick = $.cookie("nick");
-            $.removeCookie("nick");
-
-            let mensaje = nick
-                ? `Hasta luego, ${nick}. ¡Esperamos verte pronto!`
-                : "Has cerrado sesión. ¡Vuelve pronto!";
-
-            // Usa la misma estructura que `mostrarMensaje`
-            $("#au6").html(`<div><h1>${mensaje}</h1></div>`);
-
-            setTimeout(() => location.reload(), 2000); // Recarga después de 2 segundos
-        };
-        */
     this.mostrarRegistro = function() {
-        $("#registro").empty();
+        this.limpiarInterfaz();
         $("#registro").load("./cliente/registro.html", function() {
             $("#registroForm").on("submit", function(e) {
                 e.preventDefault();
@@ -213,24 +309,30 @@ function ControlWeb() {
         });
     };
 
+
     this.mostrarLogin = function() {
-        $("#contenido").empty();
-        $("#contenido").append(`
+        this.limpiarInterfaz()
+        $("#login").append(`
         <div id="loginForm" class="mx-auto" style="max-width: 500px;">
             <h3 class="text-center">Inicio de Sesión</h3>
             <form>
                 <div class="form-group">
                     <label for="email">Correo Electrónico:</label>
-                    <input type="email" class="form-control" id="email" placeholder="Introduce tu correo electrónico" required>
+                    <input type="email" class="form-control" id="email" placeholder="Introduce tu correo electrónico" required value="pasatpetruvlad@gmail.com">
                 </div>
                 <div class="form-group">
                     <label for="password">Contraseña:</label>
-                    <input type="password" class="form-control" id="password" placeholder="Introduce tu contraseña" required>
+                    <input type="password" class="form-control" id="password" placeholder="Introduce tu contraseña" required value="peter_0114">
                 </div>
                 <div class="text-center">
                     <button type="submit" id="btnLogin" class="btn btn-primary">Iniciar Sesión</button>
                 </div>
             </form>
+            <div class="text-center">
+                <a href="/auth/google">
+                    <img src="./cliente/img/google_signin_web.png" alt="imagen de inicio de sesión de google" style="height:40px;">
+                </a>
+            </div>
         </div>`);
 
         $("#loginForm").on("submit", function(e) {
@@ -251,5 +353,4 @@ function ControlWeb() {
         // $('#btnModal').on('click',function(){
         // })
     }
-
 }
